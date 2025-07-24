@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=wlsunset
+Exec=wlsunset -l 40.7 -L -74.0  # Replace with your coordinates
+Terminal=false

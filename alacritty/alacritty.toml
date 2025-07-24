@@ -1,0 +1,43 @@
+[font]
+size = 11.0
+
+[font.normal]
+family = "FiraCode"
+style = "Regular"
+
+[window]
+opacity = 1
+
+[window.padding]
+x = 12
+y = 12
+
+[selection]
+save_to_clipboard = true
+
+# Default colors
+[colors.primary]
+background = '#282828'
+foreground = '#d4be98'
+
+# Normal colors
+[colors.normal]
+black   = '#32302f'
+red     = '#ea6962'
+green   = '#a9b665'
+yellow  = '#d8a657'
+blue    = '#7daea3'
+magenta = '#d3869b'
+cyan    = '#89b482'
+white   = '#d4be98'
+
+[colors.bright]
+black   = '#434a4c'
+red     = '#ee8b86'
+green   = '#b7c37f'
+yellow  = '#dfb777'
+blue    = '#97beb6'
+magenta = '#dfa5b4'
+cyan    = '#a1c49c'
+white   = '#ebe1d0'
+
