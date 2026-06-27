@@ -1,0 +1,140 @@
+# AeroSpace config — ports the Hyprland setup from ~/.config/hypr to macOS.
+# Install location on the Mac: ~/.aerospace.toml  (or ~/.config/aerospace/aerospace.toml)
+#
+# Main modifier = alt (Option). On Linux you use SUPER; on macOS the SUPER-position
+# key is Cmd, but Cmd is overloaded by nearly every app (Cmd+Q/W/T/1...), so AeroSpace
+# (and this config) uses Option as the window-manager modifier. Mentally: alt == SUPER.
+
+start-at-login = true
+
+# Keep SketchyBar's workspace indicator in sync: on every focus change, fire a
+# custom event carrying the focused workspace id. (Requires SketchyBar installed.)
+after-startup-command = ['exec-and-forget sketchybar']
+exec-on-workspace-change = [
+    '/bin/bash', '-c',
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
+]
+
+# Tiling model. Hyprland 'dwindle' is a spiral BSP; AeroSpace 'tiles' + 'auto'
+# orientation is the closest equivalent (splits along the longer edge).
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+# Matches Hyprland: gaps_in = 0, gaps_out = 0.
+[gaps]
+inner.horizontal = 0
+inner.vertical   = 0
+outer.left       = 0
+outer.bottom     = 0
+outer.top        = 0
+outer.right      = 0
+
+# Pin workspaces to monitors, mirroring conf/monitor.conf:
+#   1-5  -> primary monitor (HDMI-A-1 on Linux)
+#   6-10 -> secondary monitor (DP-2 on Linux)
+# With a single monitor these are ignored harmlessly. Adjust 'main'/'secondary'
+# (or use a monitor-name regex) to match your physical layout.
+[workspace-to-monitor-force-assignment]
+1 = 'main'
+2 = 'main'
+3 = 'main'
+4 = 'main'
+5 = 'main'
+6 = 'secondary'
+7 = 'secondary'
+8 = 'secondary'
+9 = 'secondary'
+10 = 'secondary'
+
+# Pin apps to workspaces, replacing windowrules.conf + the focus scripts' "move
+# app to its workspace" behavior. Obsidian -> 10, Spotify -> 9 (both on monitor 2).
+[[on-window-detected]]
+if.app-id = 'md.obsidian'
+run = 'move-node-to-workspace 10'
+
+[[on-window-detected]]
+if.app-id = 'com.spotify.client'
+run = 'move-node-to-workspace 9'
+
+# ----------------------------------------------------------------------------
+# Main mode (the global keymap). Mirrors conf/binds.conf.
+# ----------------------------------------------------------------------------
+[mode.main.binding]
+
+# --- Actions ---
+alt-enter      = 'exec-and-forget open -a Alacritty'        # SUPER+RETURN  -> terminal
+alt-q          = 'close --quit-if-last-window'              # SUPER+Q       -> close window
+alt-e          = 'exec-and-forget open -a Finder'           # SUPER+E       -> file manager
+alt-t          = 'layout floating tiling'                   # SUPER+T       -> toggle floating
+alt-f          = 'fullscreen'                               # SUPER+F       -> fullscreen
+alt-shift-f    = 'macos-native-fullscreen'                  # SUPER+SHIFT+F -> native fullscreen (see notes)
+alt-ctrl-enter = 'exec-and-forget open -a Raycast'          # SUPER+CTRL+RETURN -> launcher (rofi -> Raycast/Spotlight)
+alt-p          = 'layout accordion tiles'                   # SUPER+P       -> nearest thing to pseudo (see notes)
+alt-b          = 'exec-and-forget open -a "Google Chrome"'  # SUPER+B       -> browser
+alt-shift-r    = 'reload-config'                            # SUPER+SHIFT+R -> reload config (hyprctl reload)
+alt-shift-s    = 'exec-and-forget screencapture -i -c'      # SUPER+SHIFT+S -> region screenshot to clipboard
+
+# --- Focus (h/l = within-tiling; j/k = within-tiling, cycling workspace at the edge) ---
+alt-h = 'focus left'                                                  # SUPER+h
+alt-l = 'focus right'                                                 # SUPER+l
+alt-k = 'exec-and-forget ~/.config/aerospace/scripts/smart_focus.sh up no'    # SUPER+k (smart_focus)
+alt-j = 'exec-and-forget ~/.config/aerospace/scripts/smart_focus.sh down no'  # SUPER+j (smart_focus)
+
+# --- Move window (h/l within-tiling; j/k carry across the workspace edge) ---
+alt-shift-h = 'move left'                                                       # SUPER+SHIFT+h
+alt-shift-l = 'move right'                                                      # SUPER+SHIFT+l
+alt-shift-k = 'exec-and-forget ~/.config/aerospace/scripts/smart_focus.sh up yes'   # SUPER+SHIFT+k
+alt-shift-j = 'exec-and-forget ~/.config/aerospace/scripts/smart_focus.sh down yes' # SUPER+SHIFT+j
+
+# --- Switch workspaces (SUPER+[0-9]) ---
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+alt-0 = 'workspace 10'
+
+# --- Move active window to workspace (SUPER+SHIFT+[0-9]) ---
+alt-shift-1 = 'move-node-to-workspace 1'
+alt-shift-2 = 'move-node-to-workspace 2'
+alt-shift-3 = 'move-node-to-workspace 3'
+alt-shift-4 = 'move-node-to-workspace 4'
+alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-6 = 'move-node-to-workspace 6'
+alt-shift-7 = 'move-node-to-workspace 7'
+alt-shift-8 = 'move-node-to-workspace 8'
+alt-shift-9 = 'move-node-to-workspace 9'
+alt-shift-0 = 'move-node-to-workspace 10'
+
+# --- App focus scripts (SUPER+SHIFT+O / I / P -> obsidian_focus.sh) ---
+alt-shift-o = 'exec-and-forget ~/.config/aerospace/scripts/app_focus.sh obsidian' # SUPER+SHIFT+O
+alt-shift-i = 'exec-and-forget ~/.config/aerospace/scripts/app_focus.sh back'     # SUPER+SHIFT+I
+alt-shift-p = 'exec-and-forget ~/.config/aerospace/scripts/app_focus.sh spotify'  # SUPER+SHIFT+P
+
+# --- Media / Spotify (SUPER+space, SUPER+brackets, SUPER+F11/F12) ---
+# Physical media keys (volume/brightness) work natively on macOS, so they aren't mapped.
+alt-space             = "exec-and-forget osascript -e 'tell application \"Spotify\" to playpause'"
+alt-rightSquareBracket = "exec-and-forget osascript -e 'tell application \"Spotify\" to next track'"
+alt-leftSquareBracket  = "exec-and-forget osascript -e 'tell application \"Spotify\" to previous track'"
+alt-f11 = "exec-and-forget osascript -e 'tell application \"Spotify\" to set sound volume to (sound volume - 5)'"
+alt-f12 = "exec-and-forget osascript -e 'tell application \"Spotify\" to set sound volume to (sound volume + 5)'"
+
+# --- Resize submap (SUPER+R) ---
+alt-r = 'mode resize'
+
+# ----------------------------------------------------------------------------
+# Resize mode — ports the Hyprland 'resize' submap (h/j/k/l resize by a step).
+# Enter with alt-r; leave with esc / enter / r.
+# ----------------------------------------------------------------------------
+[mode.resize.binding]
+h = 'resize width -30'
+l = 'resize width +30'
+k = 'resize height -30'
+j = 'resize height +30'
+enter = 'mode main'
+esc   = 'mode main'
+r     = 'mode main'
