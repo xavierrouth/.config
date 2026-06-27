@@ -1,0 +1,98 @@
+#!/bin/bash
+# SketchyBar config — recreates the Waybar layout from ~/.config/waybar/config.
+# Install to: ~/.config/sketchybar/sketchybarrc  (chmod +x it)
+# Layout:  left  = power menu, workspaces, AeroSpace mode
+#          center= media (Spotify), clock
+#          right = cpu, memory, network, battery, volume
+#
+# Requires: sketchybar, a Nerd Font (font-hack-nerd-font), aerospace.
+
+PLUGIN_DIR="$HOME/.config/sketchybar/plugins"
+
+##### Bar appearance (Waybar had position=bottom, slim) #####
+sketchybar --bar \
+    position=bottom \
+    height=28 \
+    blur_radius=20 \
+    color=0xcc1d2021          # gruvbox-ish dark, semi-transparent
+
+##### Global defaults #####
+sketchybar --default \
+    icon.font="Hack Nerd Font:Bold:14.0" \
+    icon.color=0xffd4be98 \
+    label.font="Hack Nerd Font:Bold:13.0" \
+    label.color=0xffd4be98 \
+    padding_left=5 \
+    padding_right=5 \
+    label.padding_left=4 \
+    label.padding_right=4 \
+    icon.padding_left=4 \
+    icon.padding_right=4
+
+##### LEFT: power menu (custom/exit) #####
+sketchybar --add item power left \
+    --set power icon="" label.drawing=off \
+    click_script="$PLUGIN_DIR/power.sh"
+
+##### LEFT: workspaces 1-10, synced with AeroSpace #####
+# AeroSpace pushes a "aerospace_workspace_change" event (see hook in aerospace.toml).
+sketchybar --add event aerospace_workspace_change
+
+for sid in 1 2 3 4 5 6 7 8 9 10; do
+    sketchybar --add item space.$sid left \
+        --subscribe space.$sid aerospace_workspace_change \
+        --set space.$sid \
+            label="$sid" \
+            icon.drawing=off \
+            click_script="aerospace workspace $sid" \
+            script="$PLUGIN_DIR/aerospace.sh $sid"
+done
+
+##### LEFT: AeroSpace binding mode (hyprland/mode -> resize submap, etc.) #####
+sketchybar --add item mode left \
+    --set mode label.drawing=off icon.drawing=off \
+    --subscribe mode aerospace_mode_change
+
+##### CENTER: media (custom/media -> Spotify) #####
+sketchybar --add item media center \
+    --set media \
+        icon="" \
+        label="" \
+        max_chars=40 \
+        scroll_texts=on \
+        update_freq=5 \
+        script="$PLUGIN_DIR/media.sh" \
+        click_script="osascript -e 'tell application \"Spotify\" to playpause'" \
+    --subscribe media media_change
+
+##### CENTER: clock #####
+sketchybar --add item clock center \
+    --set clock \
+        update_freq=10 \
+        icon="" \
+        script="$PLUGIN_DIR/clock.sh"
+
+##### RIGHT: volume (pulseaudio) #####
+sketchybar --add item volume right \
+    --set volume script="$PLUGIN_DIR/volume.sh" \
+    --subscribe volume volume_change
+
+##### RIGHT: battery #####
+sketchybar --add item battery right \
+    --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+    --subscribe battery system_woke power_source_change
+
+##### RIGHT: network (wifi) #####
+sketchybar --add item network right \
+    --set network update_freq=5 script="$PLUGIN_DIR/network.sh"
+
+##### RIGHT: memory #####
+sketchybar --add item memory right \
+    --set memory update_freq=5 icon="" script="$PLUGIN_DIR/memory.sh"
+
+##### RIGHT: cpu #####
+sketchybar --add item cpu right \
+    --set cpu update_freq=5 icon="" script="$PLUGIN_DIR/cpu.sh"
+
+##### Finalize #####
+sketchybar --update
